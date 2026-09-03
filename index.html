@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noai, noimageai, noindex-image">
-<title>Photographs</title>
+<title>David Tobin</title>
 
 <style>
   :root{ --page:#ffffff; --ink:#1c1c1c; --ink-soft:#7a7a7a; --bevel:rgba(0,0,0,.07); }
@@ -14,7 +14,6 @@
 
   header{ text-align:center; padding:80px 24px 40px; }
   header .name{ margin:0; font-weight:400; font-size:20px; letter-spacing:.34em; text-transform:uppercase; }
-  header .tagline{ margin:14px 0 0; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-soft); }
 
   .scatter{
     display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-start;
@@ -55,44 +54,32 @@
 <body>
 
 <!-- ==================================================================
-     YOUR CONTROL PANEL  -  everything you'll change lives right here.
+     YOUR CONTROL PANEL
      ================================================================== -->
 <script>
-  // 1) YOUR DETAILS  ---------------------------------------------------
+  // 1) YOUR DETAILS
   const SITE = {
-    name:      "David Tobin",   // the name shown at the top
-    instagram: "david_tobin",   // just the handle - no "@", no full link
-    otherSite: "scrapjack.net"  // your other site, shown in the footer
+    name:      "David Tobin",
+    instagram: "david_tobin",   // just the handle - no "@"
+    otherSite: "scrapjack.net"
   };
 
-  // 2) SETTINGS  -------------------------------------------------------
-  const VISIBLE      = 20;      // how many photos show on the wall at once
-  const SHUFFLE_SECS = 60;      // reshuffle to a fresh random set every 60 seconds
+  // 2) WHERE THE PHOTOS LIVE
+  //    The site reads this folder in your GitHub repo automatically.
+  //    TO ADD PHOTOS: drop image files into the "images" folder in your
+  //    repo and commit. The folder can hold 100+; the site shows a random
+  //    77 at a time and pulls a fresh random 77 every 777 seconds.
+  const REPO = { owner:"Scrapjacked", name:"davidtobinphotography", folder:"images" };
 
-  // 3) YOUR PHOTOS  ----------------------------------------------------
-  //    Put ALL your photos here (e.g. all 60). The wall shows a random
-  //    VISIBLE of them, then reshuffles every SHUFFLE_SECS seconds.
-  //    Each line is one photo. Every photo keeps its natural shape.
-  //
-  //    Right now each line is a placeholder SIZE ("width x height").
-  //    To use a REAL photo: make a folder named  photos  in this repo,
-  //    put your image in it, and replace the size with the path, e.g.:
-  //        "photos/beach-01.jpg",
-  const PHOTOS = [
-    "600x800","800x560","620x620","560x760","820x600","600x600",
-    "580x780","800x540","640x640","560x740","820x580","600x820",
-    "700x560","620x620","560x760","800x600","600x780","660x560",
-    "760x560","560x820","640x600","820x620","600x740","700x620",
-    "560x700","800x620","620x780","680x560","560x640","800x580",
-    "600x760","720x600"
-  ];
+  // 3) SETTINGS
+  const VISIBLE      = 77;    // how many show at once (drawn from the whole folder)
+  const SHUFFLE_SECS = 777;   // every 777s, pull a fresh random 77 from the folder
 </script>
-<!-- ============ end of control panel - nothing below needs editing ============ -->
+<!-- ============ nothing below needs editing ============ -->
 
 
 <header>
-  <h1 class="name" id="siteName">Your Name</h1>
-  <p class="tagline">Photographs</p>
+  <h1 class="name" id="siteName">David Tobin</h1>
 </header>
 
 <main class="scatter" id="scatter"></main>
@@ -115,18 +102,23 @@
   other.href = "https://" + SITE.otherSite;
   other.textContent = SITE.otherSite;
 
+  // gray stand-in used ONLY if the photos folder can't be read yet
   function placeholder(spec, i){
     const p = spec.split('x'); const w = +p[0], h = +p[1];
     const tones = ['#efedea','#e9e7e3','#eceae6','#e6e3de'];
-    const bg = tones[i % tones.length];
     const fs = Math.round(Math.min(w,h)/9);
     const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='"+w+"' height='"+h+"'>"
-      + "<rect width='100%' height='100%' fill='"+bg+"'/>"
+      + "<rect width='100%' height='100%' fill='"+tones[i%tones.length]+"'/>"
       + "<rect x='0.5' y='0.5' width='"+(w-1)+"' height='"+(h-1)+"' fill='none' stroke='rgba(0,0,0,0.07)'/>"
       + "<text x='50%' y='50%' fill='rgba(0,0,0,0.26)' font-family='Helvetica,Arial,sans-serif' font-size='"+fs+"' letter-spacing='2' text-anchor='middle' dominant-baseline='middle'>photo</text>"
       + "</svg>";
     return "data:image/svg+xml," + encodeURIComponent(svg);
   }
+  const PLACEHOLDERS = (function(){
+    const out=[]; const ws=[560,600,620,640,660,680,700,720,760,800,820]; const hs=[540,560,600,620,640,700,740,760,780,800,820];
+    for(let i=0;i<110;i++){ out.push(ws[i%ws.length] + "x" + hs[(i*7)%hs.length]); }
+    return out;
+  })();
 
   function shuffled(arr){
     const a = arr.slice();
@@ -137,39 +129,57 @@
   const sizes = ['size-s','size-m','size-l'];
   const scatter = document.getElementById('scatter');
   const lightbox = document.getElementById('lightbox');
-  let first = true;
+
+  let ALL = [];              // the full pool from the folder
+  let usingPlaceholders = false;
+
+  // each cycle: a fresh random selection of n, no duplicates within it
+  function nextSet(n){
+    return shuffled(ALL).slice(0, Math.min(n, ALL.length));
+  }
 
   function build(){
-    const pick = shuffled(PHOTOS).slice(0, Math.min(VISIBLE, PHOTOS.length));
     const frag = document.createDocumentFragment();
-    pick.forEach(function(entry, i){
+    nextSet(VISIBLE).forEach(function(entry, i){
       const fig = document.createElement('figure');
       fig.className = 'frame ' + sizes[Math.floor(Math.random()*sizes.length)];
-      fig.style.marginTop = Math.floor(Math.random()*64) + 'px';   // staggered height
+      fig.style.marginTop = Math.floor(Math.random()*64) + 'px';
       const img = document.createElement('img');
-      img.src = /^\d+x\d+$/.test(entry) ? placeholder(entry, i) : entry;
-      img.alt=''; img.draggable=false;
+      img.src = usingPlaceholders ? placeholder(entry, i) : entry;
+      img.alt=''; img.draggable=false; img.loading='lazy';
       fig.appendChild(img);
       frag.appendChild(fig);
     });
     return frag;
   }
 
+  let first = true;
   function render(){
-    if(lightbox.classList.contains('open')) return;   // don't reshuffle while viewing a photo
+    if(lightbox.classList.contains('open')) return;   // don't reshuffle mid-view
     if(first){ scatter.appendChild(build()); first=false; return; }
     scatter.style.opacity = 0;
-    setTimeout(function(){
-      scatter.innerHTML = '';
-      scatter.appendChild(build());
-      scatter.style.opacity = 1;
-    }, 500);
+    setTimeout(function(){ scatter.innerHTML=''; scatter.appendChild(build()); scatter.style.opacity=1; }, 500);
   }
 
-  render();
-  setInterval(render, SHUFFLE_SECS * 1000);
+  // ask GitHub for the folder's file list, then start
+  function start(){
+    render();
+    setInterval(render, SHUFFLE_SECS * 1000);
+  }
+  const api = "https://api.github.com/repos/" + REPO.owner + "/" + REPO.name + "/contents/" + REPO.folder;
+  fetch(api, { headers:{ 'Accept':'application/vnd.github.v3+json' } })
+    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+    .then(function(data){
+      const imgs = data
+        .filter(function(f){ return f.type==='file' && /\.(jpe?g|png|gif|webp)$/i.test(f.name); })
+        .map(function(f){ return REPO.folder + '/' + f.name; });
+      if(imgs.length){ ALL = imgs; usingPlaceholders = false; }
+      else { ALL = PLACEHOLDERS; usingPlaceholders = true; }
+      start();
+    })
+    .catch(function(){ ALL = PLACEHOLDERS; usingPlaceholders = true; start(); });
 
-  // click to enlarge (delegated, so it survives reshuffles)
+  // click to enlarge
   const lightImg = document.getElementById('lightboxImg');
   const closeBtn = document.getElementById('closeBtn');
   scatter.addEventListener('click', function(e){
