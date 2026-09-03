@@ -12,46 +12,41 @@
   html,body{ margin:0; background:var(--page); color:var(--ink); }
   body{ font-family:"Helvetica Neue",Arial,system-ui,sans-serif; -webkit-font-smoothing:antialiased; -webkit-user-select:none; user-select:none; }
 
-  header{ text-align:center; padding:80px 24px 40px; }
+  header{ text-align:center; padding:72px 24px 26px; }
   header .name{ margin:0; font-weight:400; font-size:20px; letter-spacing:.34em; text-transform:uppercase; }
 
+  /* loose scattered wall - varied sizes, uneven heights & spacing, no rows */
   .scatter{
     display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-start;
-    max-width:1200px; margin:0 auto; padding:20px 28px 60px;
+    max-width:1280px; margin:0 auto; padding:10px 22px 60px;
     transition:opacity .5s ease; opacity:1;
   }
   .frame{
-    margin:0 20px 26px; background:#fff; padding:11px; border-radius:1px;
-    box-shadow:0 1px 2px rgba(0,0,0,.05), 0 12px 26px rgba(0,0,0,.11);
+    margin-bottom:0; background:#fff; padding:9px; border-radius:1px;
+    box-shadow:0 2px 4px rgba(0,0,0,.10), 0 14px 30px rgba(0,0,0,.18);
     cursor:pointer; transition:transform .25s ease, box-shadow .25s ease;
   }
-  .frame:hover{ transform:translateY(-3px); box-shadow:0 2px 5px rgba(0,0,0,.06), 0 20px 44px rgba(0,0,0,.16); z-index:5; }
-  .frame img{ display:block; width:100%; height:auto; border:1px solid var(--bevel); -webkit-user-drag:none; pointer-events:none; }
-  .size-s{ width:150px; } .size-m{ width:192px; } .size-l{ width:234px; }
+  .frame:hover{ transform:translateY(-4px); box-shadow:0 4px 8px rgba(0,0,0,.12), 0 24px 50px rgba(0,0,0,.24); z-index:5; }
+  .frame img{ display:block; width:auto; height:auto; border:1px solid var(--bevel); -webkit-user-drag:none; pointer-events:none; }
   @media (max-width:640px){
-    .scatter{ padding:12px 16px 48px; }
-    .frame{ margin:0 10px 16px; padding:8px; }
-    .size-s{ width:104px; } .size-m{ width:132px; } .size-l{ width:158px; }
+    .scatter{ padding:8px 12px 44px; }
+    .frame{ padding:7px; }
   }
 
-  footer{ max-width:640px; margin:20px auto 0; padding:44px 24px 76px; text-align:center; border-top:1px solid rgba(0,0,0,.08); }
+  footer{ max-width:640px; margin:16px auto 0; padding:44px 24px 76px; text-align:center; border-top:1px solid rgba(0,0,0,.08); }
   footer a{ color:var(--ink); text-decoration:none; border-bottom:1px solid rgba(0,0,0,.28); padding-bottom:1px; }
   footer a:hover{ border-bottom-color:var(--ink); }
   footer .line{ margin:0 0 16px; font-size:15px; }
   footer .line.small{ font-size:13px; color:var(--ink-soft); margin-top:22px; }
   footer .line.small a{ color:var(--ink-soft); border-bottom-color:rgba(0,0,0,.18); }
-  .refresh-label{ margin:0 0 14px; font-size:15px; }
-  .refresh-btn{ font-family:inherit; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink); background:none; border:1px solid rgba(0,0,0,.35); padding:11px 24px; border-radius:1px; cursor:pointer; transition:background .2s ease, color .2s ease; }
-  .refresh-btn:hover{ background:var(--ink); color:#fff; }
-  .footer-links{ margin-top:38px; }
 
-  .lightbox{ position:fixed; inset:0; background:rgba(255,255,255,.975); display:flex; align-items:center; justify-content:center; padding:5vmin; opacity:0; pointer-events:none; transition:opacity .28s ease; z-index:100; }
+  .lightbox{ position:fixed; inset:0; background:rgba(20,20,20,.78); display:flex; align-items:center; justify-content:center; padding:5vmin; opacity:0; pointer-events:none; transition:opacity .28s ease; z-index:100; }
   .lightbox.open{ opacity:1; pointer-events:auto; }
   .lightbox .print{ background:#fff; padding:18px; border-radius:1px; box-shadow:0 6px 18px rgba(0,0,0,.10), 0 30px 70px rgba(0,0,0,.18); max-width:min(1100px,92vw); max-height:90vh; transform:scale(.97); transition:transform .28s ease; cursor:pointer; }
   .lightbox.open .print{ transform:scale(1); }
   .lightbox .print img{ display:block; max-width:100%; max-height:calc(90vh - 36px); width:auto; height:auto; border:1px solid var(--bevel); -webkit-user-drag:none; }
-  .lightbox .close{ position:absolute; top:24px; right:28px; font-size:30px; line-height:1; color:var(--ink-soft); background:none; border:none; cursor:pointer; }
-  .lightbox .close:hover{ color:var(--ink); }
+  .lightbox .close{ position:absolute; top:24px; right:28px; font-size:30px; line-height:1; color:rgba(255,255,255,.7); background:none; border:none; cursor:pointer; }
+  .lightbox .close:hover{ color:#fff; }
   @media (prefers-reduced-motion:reduce){ *{ transition:none !important; } }
 </style>
 </head>
@@ -70,12 +65,8 @@
 
   // 2) WHERE THE PHOTOS LIVE
   //    TO ADD PHOTOS: drop image files into the "images" folder in your
-  //    repo and commit. The site shows a random set from the folder;
-  //    visitors press Refresh to load a new random set.
+  //    repo and commit. The site shows every image in that folder.
   const REPO = { owner:"Scrapjacked", name:"davidtobinphotography", folder:"images" };
-
-  // 3) SETTINGS
-  const VISIBLE = 77;    // how many show at once (drawn from the whole folder)
 </script>
 <!-- ============ nothing below needs editing ============ -->
 
@@ -87,12 +78,8 @@
 <main class="scatter" id="scatter"></main>
 
 <footer>
-  <p class="refresh-label">Refresh to see more images</p>
-  <button class="refresh-btn" id="refreshBtn">Refresh</button>
-  <div class="footer-links">
-    <p class="line">Say hello on <a id="igLink" href="#" target="_blank" rel="noopener">Instagram</a></p>
-    <p class="line small">powered by <a id="otherLink" href="#" target="_blank" rel="noopener">scrapjack.net</a></p>
-  </div>
+  <p class="line">Say hello on <a id="igLink" href="#" target="_blank" rel="noopener">Instagram</a></p>
+  <p class="line small">powered by <a id="otherLink" href="#" target="_blank" rel="noopener">scrapjack.net</a></p>
 </footer>
 
 <div class="lightbox" id="lightbox" aria-hidden="true">
@@ -137,34 +124,28 @@
   let ALL = [];
   let usingPlaceholders = false;
 
-  function nextSet(n){ return shuffled(ALL).slice(0, Math.min(n, ALL.length)); }
-
-  function build(){
+  function buildAll(){
+    const small = window.innerWidth <= 640;
     const frag = document.createDocumentFragment();
-    nextSet(VISIBLE).forEach(function(entry, i){
+    shuffled(ALL).forEach(function(entry, i){
       const fig = document.createElement('figure');
-      fig.className = 'frame ' + sizes[Math.floor(Math.random()*sizes.length)];
-      fig.style.marginTop = Math.floor(Math.random()*64) + 'px';
+      fig.className = 'frame';
+      fig.style.marginTop   = Math.floor(Math.random()*44) + 'px';
+      fig.style.marginLeft  = (6 + Math.floor(Math.random()*24)) + 'px';
+      fig.style.marginRight = (6 + Math.floor(Math.random()*24)) + 'px';
       const img = document.createElement('img');
       img.src = usingPlaceholders ? placeholder(entry, i) : entry;
       img.alt=''; img.draggable=false; img.loading='lazy';
+      img.onload = function(){
+        const portrait = img.naturalHeight >= img.naturalWidth;   // taller than wide
+        const minH = small ? (portrait?112:90) : (portrait?170:124);
+        const maxH = small ? (portrait?210:152) : (portrait?320:220);
+        img.style.height = (minH + Math.floor(Math.random()*(maxH-minH))) + 'px';
+      };
       fig.appendChild(img);
       frag.appendChild(fig);
     });
-    return frag;
-  }
-
-  let first = true;
-  function render(){
-    if(lightbox.classList.contains('open')) return;
-    if(first){ scatter.appendChild(build()); first=false; return; }
-    scatter.style.opacity = 0;
-    setTimeout(function(){ scatter.innerHTML=''; scatter.appendChild(build()); scatter.style.opacity=1; }, 500);
-  }
-
-  function start(){
-    render();
-    document.getElementById('refreshBtn').addEventListener('click', render);
+    scatter.appendChild(frag);
   }
 
   const api = "https://api.github.com/repos/" + REPO.owner + "/" + REPO.name + "/contents/" + REPO.folder;
@@ -176,15 +157,14 @@
         .map(function(f){ return f.download_url; });
       if(imgs.length){ ALL = imgs; usingPlaceholders = false; }
       else { ALL = PLACEHOLDERS; usingPlaceholders = true; }
-      start();
+      buildAll();
     })
-    .catch(function(){ ALL = PLACEHOLDERS; usingPlaceholders = true; start(); });
+    .catch(function(){ ALL = PLACEHOLDERS; usingPlaceholders = true; buildAll(); });
 
+  // lightbox
   const lightImg = document.getElementById('lightboxImg');
   const closeBtn = document.getElementById('closeBtn');
-  let viewSrcs = [];
-  let viewIndex = 0;
-
+  let viewSrcs = [], viewIndex = 0;
   function openAt(src){
     viewSrcs = Array.prototype.map.call(scatter.querySelectorAll('.frame img'), function(im){ return im.src; });
     viewIndex = viewSrcs.indexOf(src); if(viewIndex < 0) viewIndex = 0;
@@ -197,16 +177,12 @@
     lightImg.src = viewSrcs[viewIndex];
   }
   function close(){ lightbox.classList.remove('open'); lightbox.setAttribute('aria-hidden','true'); }
-
   scatter.addEventListener('click', function(e){
     const fig = e.target.closest('.frame'); if(!fig) return;
     openAt(fig.querySelector('img').src);
   });
-
-  // tap the photo -> next; tap the surrounding area -> close
   lightbox.addEventListener('click', function(e){
-    if(e.target === lightImg || e.target.closest('.print')){ step(1); }
-    else { close(); }
+    if(e.target === lightImg || e.target.closest('.print')){ step(1); } else { close(); }
   });
   closeBtn.addEventListener('click', function(e){ e.stopPropagation(); close(); });
   document.addEventListener('keydown', function(e){
