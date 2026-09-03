@@ -172,7 +172,7 @@
     .then(function(data){
       const imgs = data
         .filter(function(f){ return f.type==='file' && /\.(jpe?g|png|gif|webp)$/i.test(f.name); })
-        .map(function(f){ return REPO.folder + '/' + f.name; });
+        .map(function(f){ return f.download_url; });   // load straight from GitHub
       if(imgs.length){ ALL = imgs; usingPlaceholders = false; }
       else { ALL = PLACEHOLDERS; usingPlaceholders = true; }
       start();
