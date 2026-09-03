@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noai, noimageai, noindex-image">
+<title>Photographs</title>
+
+<style>
+  :root{ --page:#ffffff; --ink:#1c1c1c; --ink-soft:#7a7a7a; --bevel:rgba(0,0,0,.07); }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:var(--page); color:var(--ink); }
+  body{ font-family:"Helvetica Neue",Arial,system-ui,sans-serif; -webkit-font-smoothing:antialiased; -webkit-user-select:none; user-select:none; }
+
+  header{ text-align:center; padding:80px 24px 40px; }
+  header .name{ margin:0; font-weight:400; font-size:20px; letter-spacing:.34em; text-transform:uppercase; }
+  header .tagline{ margin:14px 0 0; font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-soft); }
+
+  .scatter{
+    display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-start;
+    max-width:1200px; margin:0 auto; padding:20px 28px 60px;
+    transition:opacity .5s ease; opacity:1;
+  }
+  .frame{
+    margin:0 20px 26px; background:#fff; padding:11px; border-radius:1px;
+    box-shadow:0 1px 2px rgba(0,0,0,.05), 0 12px 26px rgba(0,0,0,.11);
+    cursor:pointer; transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .frame:hover{ transform:translateY(-3px); box-shadow:0 2px 5px rgba(0,0,0,.06), 0 20px 44px rgba(0,0,0,.16); z-index:5; }
+  .frame img{ display:block; width:100%; height:auto; border:1px solid var(--bevel); -webkit-user-drag:none; pointer-events:none; }
+  .size-s{ width:150px; } .size-m{ width:192px; } .size-l{ width:234px; }
+  @media (max-width:640px){
+    .scatter{ padding:12px 16px 48px; }
+    .frame{ margin:0 10px 16px; padding:8px; }
+    .size-s{ width:104px; } .size-m{ width:132px; } .size-l{ width:158px; }
+  }
+
+  footer{ max-width:640px; margin:20px auto 0; padding:48px 24px 80px; text-align:center; border-top:1px solid rgba(0,0,0,.08); }
+  footer a{ color:var(--ink); text-decoration:none; border-bottom:1px solid rgba(0,0,0,.28); padding-bottom:1px; }
+  footer a:hover{ border-bottom-color:var(--ink); }
+  footer .line{ margin:0 0 16px; font-size:15px; }
+  footer .line.small{ font-size:13px; color:var(--ink-soft); margin-top:22px; }
+  footer .line.small a{ color:var(--ink-soft); border-bottom-color:rgba(0,0,0,.18); }
+
+  .lightbox{ position:fixed; inset:0; background:rgba(255,255,255,.975); display:flex; align-items:center; justify-content:center; padding:5vmin; opacity:0; pointer-events:none; transition:opacity .28s ease; z-index:100; }
+  .lightbox.open{ opacity:1; pointer-events:auto; }
+  .lightbox .print{ background:#fff; padding:18px; border-radius:1px; box-shadow:0 6px 18px rgba(0,0,0,.10), 0 30px 70px rgba(0,0,0,.18); max-width:min(1100px,92vw); max-height:90vh; transform:scale(.97); transition:transform .28s ease; }
+  .lightbox.open .print{ transform:scale(1); }
+  .lightbox .print img{ display:block; max-width:100%; max-height:calc(90vh - 36px); width:auto; height:auto; border:1px solid var(--bevel); -webkit-user-drag:none; }
+  .lightbox .close{ position:absolute; top:24px; right:28px; font-size:30px; line-height:1; color:var(--ink-soft); background:none; border:none; cursor:pointer; }
+  .lightbox .close:hover{ color:var(--ink); }
+  @media (prefers-reduced-motion:reduce){ *{ transition:none !important; } }
+</style>
+</head>
+<body>
+
+<!-- ==================================================================
+     YOUR CONTROL PANEL  -  everything you'll change lives right here.
+     ================================================================== -->
+<script>
+  // 1) YOUR DETAILS  ---------------------------------------------------
+  const SITE = {
+    name:      "Your Name",     // the name shown at the top
+    instagram: "yourhandle",    // just the handle - no "@", no full link
+    otherSite: "scrapjack.net"  // your other site, shown in the footer
+  };
+
+  // 2) SETTINGS  -------------------------------------------------------
+  const VISIBLE      = 20;      // how many photos show on the wall at once
+  const SHUFFLE_SECS = 60;      // reshuffle to a fresh random set every 60 seconds
+
+  // 3) YOUR PHOTOS  ----------------------------------------------------
+  //    Put ALL your photos here (e.g. all 60). The wall shows a random
+  //    VISIBLE of them, then reshuffles every SHUFFLE_SECS seconds.
+  //    Each line is one photo. Every photo keeps its natural shape.
+  //
+  //    Right now each line is a placeholder SIZE ("width x height").
+  //    To use a REAL photo: make a folder named  photos  in this repo,
+  //    put your image in it, and replace the size with the path, e.g.:
+  //        "photos/beach-01.jpg",
+  const PHOTOS = [
+    "600x800","800x560","620x620","560x760","820x600","600x600",
+    "580x780","800x540","640x640","560x740","820x580","600x820",
+    "700x560","620x620","560x760","800x600","600x780","660x560",
+    "760x560","560x820","640x600","820x620","600x740","700x620",
+    "560x700","800x620","620x780","680x560","560x640","800x580",
+    "600x760","720x600"
+  ];
+</script>
+<!-- ============ end of control panel - nothing below needs editing ============ -->
+
+
+<header>
+  <h1 class="name" id="siteName">Your Name</h1>
+  <p class="tagline">Photographs</p>
+</header>
+
+<main class="scatter" id="scatter"></main>
+
+<footer>
+  <p class="line">Say hello on <a id="igLink" href="#" target="_blank" rel="noopener">Instagram</a></p>
+  <p class="line small">Also see <a id="otherLink" href="#" target="_blank" rel="noopener">scrapjack.net</a></p>
+</footer>
+
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button class="close" id="closeBtn" aria-label="Close">&times;</button>
+  <div class="print"><img id="lightboxImg" src="" alt="" draggable="false"></div>
+</div>
+
+<script>
+  document.getElementById('siteName').textContent = SITE.name;
+  const ig = document.getElementById('igLink');
+  ig.href = "https://instagram.com/" + SITE.instagram;
+  const other = document.getElementById('otherLink');
+  other.href = "https://" + SITE.otherSite;
+  other.textContent = SITE.otherSite;
+
+  function placeholder(spec, i){
+    const p = spec.split('x'); const w = +p[0], h = +p[1];
+    const tones = ['#efedea','#e9e7e3','#eceae6','#e6e3de'];
+    const bg = tones[i % tones.length];
+    const fs = Math.round(Math.min(w,h)/9);
+    const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='"+w+"' height='"+h+"'>"
+      + "<rect width='100%' height='100%' fill='"+bg+"'/>"
+      + "<rect x='0.5' y='0.5' width='"+(w-1)+"' height='"+(h-1)+"' fill='none' stroke='rgba(0,0,0,0.07)'/>"
+      + "<text x='50%' y='50%' fill='rgba(0,0,0,0.26)' font-family='Helvetica,Arial,sans-serif' font-size='"+fs+"' letter-spacing='2' text-anchor='middle' dominant-baseline='middle'>photo</text>"
+      + "</svg>";
+    return "data:image/svg+xml," + encodeURIComponent(svg);
+  }
+
+  function shuffled(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; }
+    return a;
+  }
+
+  const sizes = ['size-s','size-m','size-l'];
+  const scatter = document.getElementById('scatter');
+  const lightbox = document.getElementById('lightbox');
+  let first = true;
+
+  function build(){
+    const pick = shuffled(PHOTOS).slice(0, Math.min(VISIBLE, PHOTOS.length));
+    const frag = document.createDocumentFragment();
+    pick.forEach(function(entry, i){
+      const fig = document.createElement('figure');
+      fig.className = 'frame ' + sizes[Math.floor(Math.random()*sizes.length)];
+      fig.style.marginTop = Math.floor(Math.random()*64) + 'px';   // staggered height
+      const img = document.createElement('img');
+      img.src = /^\d+x\d+$/.test(entry) ? placeholder(entry, i) : entry;
+      img.alt=''; img.draggable=false;
+      fig.appendChild(img);
+      frag.appendChild(fig);
+    });
+    return frag;
+  }
+
+  function render(){
+    if(lightbox.classList.contains('open')) return;   // don't reshuffle while viewing a photo
+    if(first){ scatter.appendChild(build()); first=false; return; }
+    scatter.style.opacity = 0;
+    setTimeout(function(){
+      scatter.innerHTML = '';
+      scatter.appendChild(build());
+      scatter.style.opacity = 1;
+    }, 500);
+  }
+
+  render();
+  setInterval(render, SHUFFLE_SECS * 1000);
+
+  // click to enlarge (delegated, so it survives reshuffles)
+  const lightImg = document.getElementById('lightboxImg');
+  const closeBtn = document.getElementById('closeBtn');
+  scatter.addEventListener('click', function(e){
+    const fig = e.target.closest('.frame'); if(!fig) return;
+    lightImg.src = fig.querySelector('img').src;
+    lightbox.classList.add('open'); lightbox.setAttribute('aria-hidden','false');
+  });
+  function close(){ lightbox.classList.remove('open'); lightbox.setAttribute('aria-hidden','true'); }
+  lightbox.addEventListener('click', close);
+  closeBtn.addEventListener('click', close);
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') close(); });
+
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  document.addEventListener('dragstart', function(e){ e.preventDefault(); });
+</script>
+
+</body>
+</html>
